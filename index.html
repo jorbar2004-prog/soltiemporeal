@@ -247,6 +247,13 @@
         Reproduce imágenes reales: las estructuras cruzan el disco de izquierda a derecha (~14°/día). Parte de la fecha actual o de 7 días atrás.
       </div>
       <div class="tr2" style="margin-bottom:10px"><span class="tl">Paso entre fotogramas</span><select id="rstep"><option value="1">1 h</option><option value="3" selected>3 h</option><option value="6">6 h</option><option value="12">12 h</option></select></div>
+      <div style="margin-bottom:8px">
+        <div class="tr2" style="margin-bottom:3px"><span class="tl">Velocidad</span><span class="sval" id="rspdv">1 fotograma / 1.5 s</span></div>
+        <input type="range" id="rspd" min="1" max="6" value="3" step="1">
+        <div class="slbl"><span>Lento</span><span>Rápido</span></div>
+      </div>
+      <div class="tr2" style="margin-bottom:10px;gap:6px"><button class="tbtn" id="fprev" style="flex:1">◀ FOTOGRAMA</button><button class="tbtn" id="fnext" style="flex:1">FOTOGRAMA ▶</button></div>
+      <div style="font-size:.48rem;color:var(--text-dim);margin-bottom:10px">Con la rotación detenida, usá ← → del teclado para avanzar o retroceder un fotograma.</div>
       <div>
         <div class="tr2" style="margin-bottom:3px"><span class="tl">Orientación de la vista</span><span class="sval" id="rangv">0°</span></div>
         <input type="range" id="rang" min="-180" max="180" value="0" style="accent-color:var(--cold)">
@@ -274,7 +281,7 @@
     <input type="range" id="tlsl" min="0" max="5478" value="5478" step="1">
     <button class="tbtn" id="bnext">+1d ▶</button>
     <span class="sep">|</span>
-    <span class="tll">VEL</span>
+    <span class="tll" title="Velocidad del botón ▶ AUTO (días por segundo). No afecta la rotación solar.">VEL AUTO</span>
     <input type="range" id="tlspd" min="1" max="30" value="5" step="1" style="width:60px;flex-shrink:0">
     <span id="tlsv" style="font-family:var(--display);font-size:.56rem;color:var(--plasma);flex-shrink:0;min-width:32px">5d/s</span>
     <span class="sep">|</span>
@@ -295,7 +302,7 @@
 
   <footer>
     <span>Datos: <a href="https://sdo.gsfc.nasa.gov" target="_blank" rel="noopener">NASA SDO</a> · <a href="https://www.swpc.noaa.gov" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://helioviewer.org" target="_blank" rel="noopener">Helioviewer</a></span>
-    <span>HELIO Solar Observer v3.2.3</span>
+    <span>HELIO Solar Observer v3.2.4</span>
     <span><a href="https://spaceweatherlive.com" target="_blank" rel="noopener">SpaceWeatherLive</a></span>
   </footer>
 </div>
@@ -625,14 +632,34 @@ $('rreal').onchange=e=>{
   e.target.checked=true; syncRotBtn();
   const start = S.live ? new Date(NOW().getTime()-7*86400000) : S.targetDate;
   goDate(start || new Date(NOW().getTime()-7*86400000));
-  rotT=setInterval(()=>{
-    if (busy) return;
-    if (!S.targetDate) { stopRot(); return; }
-    const nx=new Date(S.targetDate.getTime()+(+$('rstep').value)*3600000);
-    if (nx>=NOW()) { goLive(); return; }
-    goDate(nx);
-  },700);
+  startRotTimer();
 };
+function rotDelay(){ return [4000,2500,1500,900,500,250][(+$('rspd').value)-1]; }
+function rotTick(){
+  if (busy) return;
+  if (!S.targetDate) { stopRot(); return; }
+  const nx=new Date(S.targetDate.getTime()+(+$('rstep').value)*3600000);
+  if (nx>=NOW()) { goLive(); return; }
+  goDate(nx);
+}
+function startRotTimer(){ clearInterval(rotT); rotT=setInterval(rotTick,rotDelay()); }
+$('rspd').oninput=()=>{
+  $('rspdv').textContent='1 fotograma / '+(rotDelay()/1000).toFixed(1)+' s';
+  if (rotT) startRotTimer();
+};
+function stepFrame(dir){
+  manual();
+  const base=S.targetDate||NOW();
+  goDate(new Date(base.getTime()+dir*(+$('rstep').value)*3600000));
+}
+$('fprev').onclick=()=>stepFrame(-1);
+$('fnext').onclick=()=>stepFrame(1);
+document.addEventListener('keydown',e=>{
+  const t=document.activeElement&&document.activeElement.tagName;
+  if (t==='INPUT'||t==='SELECT') return;
+  if (e.key==='ArrowRight') stepFrame(1);
+  else if (e.key==='ArrowLeft') stepFrame(-1);
+});
 
 // ── Auto-refresh ───────────────────────────────────────
 function resetCd() {
