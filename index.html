@@ -236,12 +236,13 @@
     <div>
       <div class="pt">Rotación Solar</div>
       <div class="tr2" style="margin-bottom:4px">
-        <span class="tl">Rotación real (6 h por fotograma)</span>
+        <span class="tl">Rotación real (fotogramas)</span>
         <label class="tog"><input type="checkbox" id="rreal"><span class="sw"></span></label>
       </div>
       <div style="font-size:.5rem;color:var(--text-dim);line-height:1.5;margin-bottom:10px">
         Reproduce imágenes reales: las estructuras cruzan el disco de izquierda a derecha (~14°/día). Parte de la fecha actual o de 7 días atrás.
       </div>
+      <div class="tr2" style="margin-bottom:10px"><span class="tl">Paso entre fotogramas</span><select id="rstep"><option value="1">1 h</option><option value="3" selected>3 h</option><option value="6">6 h</option><option value="12">12 h</option></select></div>
       <div>
         <div class="tr2" style="margin-bottom:3px"><span class="tl">Orientación de la vista</span><span class="sval" id="rangv">0°</span></div>
         <input type="range" id="rang" min="-180" max="180" value="0" style="accent-color:var(--cold)">
@@ -290,7 +291,7 @@
 
   <footer>
     <span>Datos: <a href="https://sdo.gsfc.nasa.gov" target="_blank" rel="noopener">NASA SDO</a> · <a href="https://www.swpc.noaa.gov" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://helioviewer.org" target="_blank" rel="noopener">Helioviewer</a></span>
-    <span>HELIO Solar Observer v3.2</span>
+    <span>HELIO Solar Observer v3.2.1</span>
     <span><a href="https://spaceweatherlive.com" target="_blank" rel="noopener">SpaceWeatherLive</a></span>
   </footer>
 </div>
@@ -376,7 +377,7 @@ document.onmouseup  = ()=>{drag=false;viewer.style.cursor=''};
 applyT();
 
 // ── Carga de imágenes (cascada de fuentes) ─────────────
-let loadId = 0;
+let loadId = 0, busy = false;
 
 function tryUrls(urls, lid) {
   let idx = 0;
@@ -386,6 +387,7 @@ function tryUrls(urls, lid) {
       spin.classList.remove('on');
       simg.classList.remove('loading');
       errov.classList.add('on');
+      busy = false;
       return;
     }
     const url = urls[idx++];
@@ -411,6 +413,7 @@ function tryUrls(urls, lid) {
       $('bsrc').textContent = src;
       $('bage').textContent = S.live ? 'Ahora' : fmtT(S.targetDate);
       $('bres').textContent = url.includes('1024') ? '1024px' : url.includes('512') ? '512px' : '2048px';
+      busy = false;
     };
     tmp.onerror = () => { if (done) return; done = true; clearTimeout(timer); next(); };
     tmp.src = url;
@@ -463,6 +466,7 @@ function histUrls(date) {
 
 function loadImage() {
   loadId++;
+  busy = true;
   const lid = loadId;
   simg.classList.add('loading');
   simg.classList.remove('loaded');
@@ -550,6 +554,7 @@ $('bplay').onclick = () => {
   $('bplay').classList.add('on');
   if (S.live) goDate(new Date(SDO_START));
   playT=setInterval(()=>{
+    if(busy)return;
     if(!S.targetDate||S.targetDate>=NOW()){goLive();return;}
     goDate(new Date(S.targetDate.getTime()+S.playSpd*86400000));
   },800);
@@ -595,6 +600,7 @@ $('hplay').onchange=e=>{
   e.target.checked=true;
   if (S.live) goDate(new Date(SDO_START));
   hplayT=setInterval(()=>{
+    if(busy)return;
     const cur=S.targetDate?new Date(S.targetDate.getTime()+30*86400000):NOW();
     if (cur>=NOW()){goLive();return;}
     goDate(cur);
@@ -610,11 +616,12 @@ $('rreal').onchange=e=>{
   const start = S.live ? new Date(NOW().getTime()-7*86400000) : S.targetDate;
   goDate(start || new Date(NOW().getTime()-7*86400000));
   rotT=setInterval(()=>{
+    if (busy) return;
     if (!S.targetDate) { stopRot(); return; }
-    const nx=new Date(S.targetDate.getTime()+6*3600000);
+    const nx=new Date(S.targetDate.getTime()+(+$('rstep').value)*3600000);
     if (nx>=NOW()) { goLive(); return; }
     goDate(nx);
-  },2000);
+  },700);
 };
 
 // ── Auto-refresh ───────────────────────────────────────
