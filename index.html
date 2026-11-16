@@ -13,8 +13,8 @@
     :root{
       --bg:#050200;--bg2:#0d0600;--bg3:#160a00;
       --corona:#ff6a00;--plasma:#ffaa33;--cold:#1a6aff;--green:#44ff88;
-      --dim:#6b4a20;--border:#2a1800;--border2:#3d2200;
-      --text:#e8c878;--text-dim:#8a6a30;
+      --dim:#a98443;--border:#2a1800;--border2:#3d2200;
+      --text:#f6e6bc;--text-dim:#c4a468;
       --mono:'IBM Plex Mono',monospace;--display:'Orbitron',sans-serif;
       --tr:0.28s cubic-bezier(.4,0,.2,1);
     }
@@ -25,24 +25,24 @@
     header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px;border-bottom:1px solid var(--border2);background:linear-gradient(180deg,#120800,#0a0400)}
     .logo{display:flex;align-items:baseline;gap:10px}
     .logo h1{font-family:var(--display);font-size:1.5rem;font-weight:900;letter-spacing:.3em;color:var(--corona);text-shadow:0 0 20px rgba(255,106,0,.5),0 0 40px rgba(255,106,0,.2)}
-    .logo span{font-size:.6rem;color:var(--text-dim);letter-spacing:.15em}
-    .hdr-r{display:flex;align-items:center;gap:18px;font-size:.62rem;letter-spacing:.08em;color:var(--text-dim)}
+    .logo span{font-size:.68rem;color:var(--text-dim);letter-spacing:.15em}
+    .hdr-r{display:flex;align-items:center;gap:18px;font-size:.7rem;letter-spacing:.08em;color:var(--text-dim)}
     .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-    #ts{font-family:var(--display);font-size:.7rem;color:var(--plasma);letter-spacing:.1em}
+    #ts{font-family:var(--display);font-size:.76rem;color:var(--plasma);letter-spacing:.1em}
     #sidebar-left{border-right:1px solid var(--border);padding:12px 10px;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:4px}
     #sidebar-left::-webkit-scrollbar{width:3px}
     #sidebar-left::-webkit-scrollbar-thumb{background:var(--border2)}
-    .sec{font-size:.52rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding:8px 4px 4px;border-top:1px solid var(--border);margin-top:4px}
-    .cbtn{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:8px;padding:7px 8px;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer;text-align:left;width:100%;position:relative;overflow:hidden;transition:var(--tr)}
+    .sec{flex-shrink:0;font-size:.6rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding:8px 4px 4px;border-top:1px solid var(--border);margin-top:4px}
+    .cbtn{flex-shrink:0;display:grid;grid-template-columns:46px 1fr;align-items:center;gap:8px;padding:7px 8px;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer;text-align:left;width:100%;position:relative;overflow:hidden;transition:var(--tr)}
     .cbtn::before{content:'';position:absolute;inset:0;background:var(--bc,var(--corona));opacity:0;transition:opacity var(--tr)}
     .cbtn:hover::before{opacity:.06}
     .cbtn.active{border-color:var(--bc,var(--corona));background:rgba(255,255,255,.03);box-shadow:inset 3px 0 0 var(--bc,var(--corona))}
     .cbtn.active::before{opacity:.1}
-    .csw{width:34px;height:26px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:.44rem;font-weight:600}
+    .csw{width:46px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:.5rem;font-weight:600}
     .ci{overflow:hidden}
-    .cn{font-family:var(--display);font-size:.58rem;font-weight:600;letter-spacing:.07em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .cd{font-size:.52rem;color:var(--text-dim);line-height:1.3;margin-top:1px}
+    .cn{font-family:var(--display);font-size:.66rem;font-weight:600;letter-spacing:.07em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cd{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.6rem;color:var(--text-dim);line-height:1.3;margin-top:1px}
     #viewer{position:relative;overflow:hidden;background:#000;cursor:crosshair;user-select:none;container-type:size}
     #viewer::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.65) 100%)}
     #stage{position:absolute;top:50%;left:50%;width:min(92cqw,92cqh);height:min(92cqw,92cqh);translate:-50% -50%;transform-origin:center center;will-change:transform;z-index:1}
@@ -50,9 +50,9 @@
     #simg.loading{opacity:.1}
     #sglow{position:absolute;top:50%;left:50%;width:min(92cqw,92cqh);height:min(92cqw,92cqh);translate:-50% -50%;border-radius:50%;background:radial-gradient(circle,rgba(255,100,0,.12) 0%,transparent 70%);transition:background 1s;pointer-events:none;z-index:0}
     #chovl{position:absolute;top:14px;left:14px;z-index:6;pointer-events:none}
-    #chovl .wl{font-family:var(--display);font-size:2.2rem;font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.13);letter-spacing:.05em;line-height:1}
-    #chovl .wn{font-family:var(--display);font-size:.56rem;letter-spacing:.18em;color:rgba(255,255,255,.28);margin-top:2px}
-    #sbadge{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;padding:4px 14px;background:rgba(0,0,0,.7);border:1px solid var(--border2);border-radius:20px;font-size:.58rem;letter-spacing:.1em;color:var(--text-dim);pointer-events:none;white-space:nowrap}
+    #chovl .wl{font-family:var(--display);font-size:2.2rem;font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.3);letter-spacing:.05em;line-height:1}
+    #chovl .wn{font-family:var(--display);font-size:.64rem;letter-spacing:.18em;color:rgba(255,255,255,.6);margin-top:2px}
+    #sbadge{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;padding:4px 14px;background:rgba(0,0,0,.7);border:1px solid var(--border2);border-radius:20px;font-size:.66rem;letter-spacing:.1em;color:var(--text-dim);pointer-events:none;white-space:nowrap}
     #rring{position:absolute;top:12px;right:12px;width:26px;height:26px;z-index:6}
     #rring circle{fill:none;stroke:var(--corona);stroke-width:2;stroke-dasharray:72;stroke-dashoffset:72;stroke-linecap:round;transform-origin:13px 13px;transform:rotate(-90deg);transition:stroke-dashoffset .3s linear}
     #zctrl{position:absolute;bottom:14px;right:14px;z-index:6;display:flex;flex-direction:column;gap:4px}
@@ -60,72 +60,72 @@
     .zbtn:hover{border-color:var(--corona);color:var(--corona)}
     #rotcv{position:absolute;inset:-12%;width:124%;height:124%;object-fit:contain;display:none}
     #rotcv.on{display:block}
-    #rotbtn{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;padding:8px 18px;background:rgba(0,0,0,.75);border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.55rem;letter-spacing:.16em;cursor:pointer;border-radius:20px;transition:var(--tr);white-space:nowrap}
+    #rotbtn{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;padding:8px 18px;background:rgba(0,0,0,.75);border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.62rem;letter-spacing:.16em;cursor:pointer;border-radius:20px;transition:var(--tr);white-space:nowrap}
     #rotbtn:hover{background:rgba(255,106,0,.18)}
     #rotbtn.on{background:var(--corona);color:#000}
     #errov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:10;gap:10px}
     #errov.on{display:flex}
     #errov .ei{font-size:2.5rem}
-    #errov p{font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;text-align:center;max-width:280px}
-    #rtbtn{margin-top:6px;padding:7px 18px;background:transparent;border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.58rem;letter-spacing:.18em;cursor:pointer;border-radius:2px}
+    #errov p{font-size:.72rem;color:var(--text-dim);letter-spacing:.1em;text-align:center;max-width:280px}
+    #rtbtn{margin-top:6px;padding:7px 18px;background:transparent;border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.66rem;letter-spacing:.18em;cursor:pointer;border-radius:2px}
     #rtbtn:hover{background:rgba(255,106,0,.1)}
     #spinner{position:absolute;top:50%;left:50%;width:48px;height:48px;margin:-24px 0 0 -24px;z-index:4;display:none}
     #spinner.on{display:block}
     #spinner::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--corona);animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    #sidebar-right{border-left:1px solid var(--border);padding:12px 10px;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:12px;font-size:.6rem}
+    #sidebar-right{border-left:1px solid var(--border);padding:12px 10px;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:12px;font-size:.68rem}
     #sidebar-right::-webkit-scrollbar{width:3px}
     #sidebar-right::-webkit-scrollbar-thumb{background:var(--border2)}
-    .pt{font-family:var(--display);font-size:.52rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:5px}
+    .pt{font-family:var(--display);font-size:.6rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:5px}
     .ir{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:2px 0}
     .ik{color:var(--text-dim);flex-shrink:0}
     .iv{color:var(--text);text-align:right;font-weight:500}
     #kpv{font-family:var(--display);font-size:1.8rem;font-weight:900;line-height:1}
     .btr{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:7px}
     .bfill{height:100%;border-radius:3px;transition:width 1s,background 1s}
-    .ali{display:flex;gap:7px;padding:5px 7px;border-radius:3px;border:1px solid var(--border);font-size:.58rem;line-height:1.4}
-    .ali.off{opacity:.55}
+    .ali{display:flex;gap:7px;padding:5px 7px;border-radius:3px;border:1px solid var(--border);font-size:.66rem;line-height:1.4}
+    .ali.off{opacity:.8}
     .adot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0;background:var(--border2)}
     .adG.on{background:#ff4444;box-shadow:0 0 6px #ff4444}.adS.on{background:#ff8800;box-shadow:0 0 6px #ff8800}.adR.on{background:#ffdd00;box-shadow:0 0 6px #ffdd00}
     .atxt{color:var(--text-dim)}.atxt strong{color:var(--text)}
     .tr2{display:flex;align-items:center;justify-content:space-between;gap:6px}
-    .tl{color:var(--text-dim);font-size:.58rem}
+    .tl{color:var(--text-dim);font-size:.66rem}
     .tog{position:relative;width:30px;height:15px;flex-shrink:0}
     .tog input{opacity:0;width:0;height:0}
     .sw{position:absolute;inset:0;background:var(--border2);border-radius:8px;cursor:pointer;transition:var(--tr)}
     .sw::before{content:'';position:absolute;width:9px;height:9px;left:3px;top:3px;background:var(--text-dim);border-radius:50%;transition:var(--tr)}
     input:checked+.sw{background:var(--corona)}
     input:checked+.sw::before{transform:translateX(15px);background:#fff}
-    select,input[type=month]{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:.58rem;padding:3px 6px;border-radius:3px;cursor:pointer;outline:none}
+    select,input[type=month]{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:.66rem;padding:3px 6px;border-radius:3px;cursor:pointer;outline:none}
     select:focus,input[type=month]:focus{border-color:var(--corona)}
     input[type=range]{width:100%;accent-color:var(--corona);cursor:pointer;height:14px;display:block}
-    .slbl{display:flex;justify-content:space-between;font-size:.48rem;color:var(--text-dim);margin-top:1px}
-    .sval{color:var(--plasma);font-size:.62rem;font-family:var(--display)}
+    .slbl{display:flex;justify-content:space-between;font-size:.56rem;color:var(--text-dim);margin-top:1px}
+    .sval{color:var(--plasma);font-size:.7rem;font-family:var(--display)}
     .fbtn{display:flex;align-items:center;gap:7px;width:100%;padding:5px 8px;background:rgba(255,80,0,.04);border:1px solid var(--border2);border-radius:3px;cursor:pointer;text-align:left;transition:var(--tr)}
     .fbtn:hover{border-color:var(--corona);background:rgba(255,106,0,.1)}
     .fbtn.active{border-color:#ff5555;background:rgba(255,50,50,.12)}
     .fdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-    .fi{font-size:.55rem;color:var(--text-dim);line-height:1.3}
+    .fi{font-size:.62rem;color:var(--text-dim);line-height:1.3}
     .fi strong{color:var(--text)}
     #tl{grid-column:1/-1;background:var(--bg3);border-top:1px solid var(--border2);padding:5px 14px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto}
     #tl::-webkit-scrollbar{height:3px}
     #tl::-webkit-scrollbar-thumb{background:var(--border2)}
-    .tll{font-family:var(--display);font-size:.5rem;letter-spacing:.15em;color:var(--dim);flex-shrink:0}
+    .tll{font-family:var(--display);font-size:.58rem;letter-spacing:.15em;color:var(--dim);flex-shrink:0}
     .sep{color:var(--border2);flex-shrink:0;padding:0 2px}
-    .tbtn{background:transparent;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--display);font-size:.5rem;letter-spacing:.1em;padding:3px 7px;border-radius:3px;cursor:pointer;transition:var(--tr);flex-shrink:0;white-space:nowrap}
+    .tbtn{background:transparent;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--display);font-size:.58rem;letter-spacing:.1em;padding:3px 7px;border-radius:3px;cursor:pointer;transition:var(--tr);flex-shrink:0;white-space:nowrap}
     .tbtn:hover{border-color:var(--corona);color:var(--corona)}
     .tbtn.on{border-color:var(--corona);color:var(--corona);background:rgba(255,106,0,.08)}
     #tlsl{flex:1;accent-color:var(--corona);cursor:pointer;height:16px;min-width:80px}
-    #tld{font-family:var(--display);font-size:.6rem;color:var(--plasma);letter-spacing:.08em;flex-shrink:0;min-width:150px;text-align:right}
+    #tld{font-family:var(--display);font-size:.68rem;color:var(--plasma);letter-spacing:.08em;flex-shrink:0;min-width:150px;text-align:right}
     .dp{display:flex;align-items:center;gap:4px;flex-shrink:0}
-    .dp input[type=number]{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:.56rem;border-radius:3px;outline:none;text-align:center;-moz-appearance:textfield}
+    .dp input[type=number]{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:.64rem;border-radius:3px;outline:none;text-align:center;-moz-appearance:textfield}
     .dp input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
     .dp input[type=number]:focus{border-color:var(--corona)}
     #iy{width:42px;padding:3px 4px}#im{width:28px;padding:3px 2px}#id{width:28px;padding:3px 2px}#ih{width:28px;padding:3px 2px}
-    .gb{background:transparent;border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.48rem;letter-spacing:.12em;padding:3px 8px;border-radius:3px;cursor:pointer;flex-shrink:0}
+    .gb{background:transparent;border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.56rem;letter-spacing:.12em;padding:3px 8px;border-radius:3px;cursor:pointer;flex-shrink:0}
     .gb:hover{background:rgba(255,106,0,.12)}
-    .dl{font-size:.48rem;color:var(--text-dim)}
-    footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-top:1px solid var(--border);background:var(--bg2);font-size:.52rem;color:var(--text-dim);letter-spacing:.07em;gap:10px}
+    .dl{font-size:.56rem;color:var(--text-dim)}
+    footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-top:1px solid var(--border);background:var(--bg2);font-size:.6rem;color:var(--text-dim);letter-spacing:.07em;gap:10px}
     footer a{color:var(--dim);text-decoration:none}
     footer a:hover{color:var(--plasma)}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -157,9 +157,9 @@
     <button class="cbtn" data-ch="0094" style="--bc:#55ffee"><div class="csw" style="background:linear-gradient(135deg,#001a18,#003a30)"><span style="color:#66ffee">094Å</span></div><div class="ci"><div class="cn">AIA 094 Å</div><div class="cd">Fulguraciones · 6 MK</div></div></button>
     <button class="cbtn" data-ch="0131" style="--bc:#ffee44"><div class="csw" style="background:linear-gradient(135deg,#1a1500,#403200)"><span style="color:#ffee55">131Å</span></div><div class="ci"><div class="cn">AIA 131 Å</div><div class="cd">Fulguraciones · 10 MK</div></div></button>
     <div class="sec">Composites</div>
-    <button class="cbtn" data-ch="211193171" style="--bc:#ff88ff"><div class="csw" style="background:linear-gradient(135deg,#200020,#501050)"><span style="color:#ff99ff;font-size:.4rem">211+193+171</span></div><div class="ci"><div class="cn">Triple Fusión</div><div class="cd">Colores reales SDO</div></div></button>
-    <button class="cbtn" data-ch="304211171" style="--bc:#ffaa44"><div class="csw" style="background:linear-gradient(135deg,#1a0800,#403000)"><span style="color:#ffaa55;font-size:.4rem">304+211+171</span></div><div class="ci"><div class="cn">Fusión Plasma</div><div class="cd">Prominencias</div></div></button>
-    <button class="cbtn" data-ch="094335193" style="--bc:#44aaff"><div class="csw" style="background:linear-gradient(135deg,#000a20,#00183a)"><span style="color:#44bbff;font-size:.4rem">094+335+193</span></div><div class="ci"><div class="cn">Fusión Caliente</div><div class="cd">Alta temperatura</div></div></button>
+    <button class="cbtn" data-ch="211193171" style="--bc:#ff88ff"><div class="csw" style="background:linear-gradient(135deg,#200020,#501050)"><span style="color:#ff99ff;font-size:.46rem">211+193+171</span></div><div class="ci"><div class="cn">Triple Fusión</div><div class="cd">Colores reales SDO</div></div></button>
+    <button class="cbtn" data-ch="304211171" style="--bc:#ffaa44"><div class="csw" style="background:linear-gradient(135deg,#1a0800,#403000)"><span style="color:#ffaa55;font-size:.46rem">304+211+171</span></div><div class="ci"><div class="cn">Fusión Plasma</div><div class="cd">Prominencias</div></div></button>
+    <button class="cbtn" data-ch="094335193" style="--bc:#44aaff"><div class="csw" style="background:linear-gradient(135deg,#000a20,#00183a)"><span style="color:#44bbff;font-size:.46rem">094+335+193</span></div><div class="ci"><div class="cn">Fusión Caliente</div><div class="cd">Alta temperatura</div></div></button>
   </nav>
 
   <main id="viewer">
@@ -178,7 +178,7 @@
     <div id="errov">
       <div class="ei">☀</div>
       <p>NO SE PUDO CARGAR</p>
-      <p style="font-size:.55rem">Ninguna fuente respondió para este canal y fecha.<br>Probá otro canal, otra fecha o reintentá en unos minutos.</p>
+      <p style="font-size:.62rem">Ninguna fuente respondió para este canal y fecha.<br>Probá otro canal, otra fecha o reintentá en unos minutos.</p>
       <button id="rtbtn" onclick="retry()">REINTENTAR</button>
     </div>
   </main>
@@ -195,7 +195,7 @@
     <div>
       <div class="pt">Clima Espacial · NOAA</div>
       <div id="kpv" style="color:var(--corona)">—</div>
-      <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px">Índice Kp (actividad geomagnética)</div>
+      <div style="font-size:.62rem;color:var(--text-dim);margin-top:2px">Índice Kp (actividad geomagnética)</div>
       <div class="btr"><div class="bfill" id="kpbar" style="width:0%;background:var(--corona)"></div></div>
     </div>
     <div>
@@ -215,7 +215,7 @@
     </div>
     <div>
       <div class="pt">🕰 Historia Solar</div>
-      <div style="font-size:.53rem;color:var(--text-dim);margin-bottom:8px;line-height:1.6">
+      <div style="font-size:.6rem;color:var(--text-dim);margin-bottom:8px;line-height:1.6">
         Imágenes reales desde <strong style="color:var(--corona)">2010</strong><br>
         <span style="opacity:.7">SDO/AIA · Helioviewer · SWHV Bélgica</span>
       </div>
@@ -225,9 +225,9 @@
       </div>
       <div class="tr2" style="margin-bottom:8px">
         <span class="tl">Mes exacto</span>
-        <input type="month" id="hmp" min="2010-05" style="font-size:.55rem;padding:2px 4px">
+        <input type="month" id="hmp" min="2010-05" style="font-size:.62rem;padding:2px 4px">
       </div>
-      <div style="font-size:.5rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">Eventos históricos</div>
+      <div style="font-size:.58rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">Eventos históricos</div>
       <div style="display:flex;flex-direction:column;gap:3px">
         <button class="fbtn" data-hd="2024-05-10"><span class="fdot" style="background:#ff2200;box-shadow:0 0 6px #ff2200"></span><span class="fi"><strong style="color:#ff5555">X5.8</strong> · Tormenta G5 · May 2024</span></button>
         <button class="fbtn" data-hd="2017-09-06"><span class="fdot" style="background:#ff4400;box-shadow:0 0 5px #ff4400"></span><span class="fi"><strong style="color:#ff8844">X9.3</strong> · Ciclo 24 máximo · Sep 2017</span></button>
@@ -245,7 +245,7 @@
         <span class="tl">Rotación real (fotogramas)</span>
         <label class="tog"><input type="checkbox" id="rreal"><span class="sw"></span></label>
       </div>
-      <div style="font-size:.5rem;color:var(--text-dim);line-height:1.5;margin-bottom:10px">
+      <div style="font-size:.58rem;color:var(--text-dim);line-height:1.5;margin-bottom:10px">
         Descarga los fotogramas del período elegido y los reproduce desde memoria, sin parpadeo. Las estructuras cruzan el disco de izquierda a derecha (~14°/día).
       </div>
       <div class="tr2" style="margin-bottom:10px"><span class="tl">Paso entre fotogramas</span><select id="rstep"><option value="1">1 h</option><option value="3" selected>3 h</option><option value="6">6 h</option><option value="12">12 h</option></select></div>
@@ -256,7 +256,7 @@
         <div class="slbl"><span>Lento</span><span>Rápido</span></div>
       </div>
       <div class="tr2" style="margin-bottom:10px;gap:6px"><button class="tbtn" id="fprev" style="flex:1">◀ FOTOGRAMA</button><button class="tbtn" id="fnext" style="flex:1">FOTOGRAMA ▶</button></div>
-      <div style="font-size:.48rem;color:var(--text-dim);margin-bottom:10px">Con la rotación en pausa, ← → del teclado o este slider recorren los fotogramas. Para salir, apagá el interruptor o tocá EN VIVO.</div>
+      <div style="font-size:.56rem;color:var(--text-dim);margin-bottom:10px">Con la rotación en pausa, ← → del teclado o este slider recorren los fotogramas. Para salir, apagá el interruptor o tocá EN VIVO.</div>
       <div id="rrow" style="display:none;margin-bottom:10px"><div class="tr2"><span class="tl">Fotograma</span><span class="sval" id="rfsv">—</span></div><input type="range" id="rfs" min="0" max="0" value="0" step="1"></div>
       <div>
         <div class="tr2" style="margin-bottom:3px"><span class="tl">Orientación de la vista</span><span class="sval" id="rangv">0°</span></div>
@@ -270,7 +270,7 @@
       <div class="tr2" style="margin-top:7px"><span class="tl">Intervalo</span><select id="rint"><option value="60">1 min</option><option value="120">2 min</option><option value="300" selected>5 min</option><option value="600">10 min</option></select></div>
       <div class="tr2" style="margin-top:7px"><span class="tl">Resolución</span><select id="rres"><option value="512">512 px</option><option value="1024">1024 px</option><option value="2048" selected>2048 px</option></select></div>
     </div>
-    <div style="font-size:.52rem;color:var(--text-dim);line-height:1.7;border-top:1px solid var(--border);padding-top:8px">
+    <div style="font-size:.6rem;color:var(--text-dim);line-height:1.7;border-top:1px solid var(--border);padding-top:8px">
       <strong style="color:var(--dim)">En vivo:</strong> NASA/SDO · ~15 min<br>
       <strong style="color:var(--dim)">Histórico:</strong> SWHV (Bélgica) + Helioviewer<br>
       Satélite SDO · órbita geosincrónica · ~36,000 km
@@ -287,7 +287,7 @@
     <span class="sep">|</span>
     <span class="tll" title="Velocidad del botón ▶ AUTO (días por segundo). No afecta la rotación solar.">VEL AUTO</span>
     <input type="range" id="tlspd" min="1" max="30" value="5" step="1" style="width:60px;flex-shrink:0">
-    <span id="tlsv" style="font-family:var(--display);font-size:.56rem;color:var(--plasma);flex-shrink:0;min-width:32px">5d/s</span>
+    <span id="tlsv" style="font-family:var(--display);font-size:.64rem;color:var(--plasma);flex-shrink:0;min-width:32px">5d/s</span>
     <span class="sep">|</span>
     <div class="dp">
       <span class="dl">IR A:</span>
@@ -306,7 +306,7 @@
 
   <footer>
     <span>Datos: <a href="https://sdo.gsfc.nasa.gov" target="_blank" rel="noopener">NASA SDO</a> · <a href="https://www.swpc.noaa.gov" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://helioviewer.org" target="_blank" rel="noopener">Helioviewer</a></span>
-    <span>HELIO Solar Observer v3.3.0</span>
+    <span>HELIO Solar Observer v3.3.1</span>
     <span><a href="https://spaceweatherlive.com" target="_blank" rel="noopener">SpaceWeatherLive</a></span>
   </footer>
 </div>
