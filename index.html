@@ -58,6 +58,9 @@
     #zctrl{position:absolute;bottom:14px;right:14px;z-index:6;display:flex;flex-direction:column;gap:4px}
     .zbtn{width:28px;height:28px;background:rgba(0,0,0,.75);border:1px solid var(--border2);color:var(--text);font-size:1rem;cursor:pointer;border-radius:3px;display:flex;align-items:center;justify-content:center;transition:var(--tr)}
     .zbtn:hover{border-color:var(--corona);color:var(--corona)}
+    #rotbtn{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;padding:8px 18px;background:rgba(0,0,0,.75);border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.55rem;letter-spacing:.16em;cursor:pointer;border-radius:20px;transition:var(--tr);white-space:nowrap}
+    #rotbtn:hover{background:rgba(255,106,0,.18)}
+    #rotbtn.on{background:var(--corona);color:#000}
     #errov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:10;gap:10px}
     #errov.on{display:flex}
     #errov .ei{font-size:2.5rem}
@@ -167,6 +170,7 @@
       <button class="zbtn" id="zout">−</button>
       <button class="zbtn" id="zrst">⊙</button>
     </div>
+    <button id="rotbtn" title="Reproduce imágenes reales para ver cómo rota el Sol" onmousedown="event.stopPropagation()">▶ ROTACIÓN SOLAR</button>
     <div id="sbadge"><span id="bsrc">NASA·SDO</span><span>·</span><span id="bres">—</span><span>·</span><span id="bage">—</span></div>
     <div id="spinner"></div>
     <div id="errov">
@@ -291,7 +295,7 @@
 
   <footer>
     <span>Datos: <a href="https://sdo.gsfc.nasa.gov" target="_blank" rel="noopener">NASA SDO</a> · <a href="https://www.swpc.noaa.gov" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://helioviewer.org" target="_blank" rel="noopener">Helioviewer</a></span>
-    <span>HELIO Solar Observer v3.2.1</span>
+    <span>HELIO Solar Observer v3.2.3</span>
     <span><a href="https://spaceweatherlive.com" target="_blank" rel="noopener">SpaceWeatherLive</a></span>
   </footer>
 </div>
@@ -428,7 +432,7 @@ function makeHVUrl(base, iso, ch) {
   const ops = arr.length === 1 ? [100] : arr.length === 2 ? [100,50] : [100,50,34];
   const layer = encodeURIComponent(arr.map((x,i)=>`[${x},1,${ops[i]}]`).join(','));
   const d = encodeURIComponent(iso);
-  return `${base}takeScreenshot/?date=${d}&imageScale=2.42&layers=${layer}&events=&eventLabels=false&scale=false&x0=0&y0=0&width=1024&height=1024&display=true&watermark=false`;
+  return `${base}takeScreenshot/?date=${d}&imageScale=2.8&layers=${layer}&events=&eventLabels=false&scale=false&x0=0&y0=0&width=1024&height=1024&display=true&watermark=false`;
 }
 
 function liveUrls() {
@@ -502,7 +506,13 @@ function clamp(d) { const n=NOW(); return d>n?n:d<SDO_START?new Date(SDO_START):
 // ── Timeline ───────────────────────────────────────────
 let playT=null, rotT=null, hplayT=null, cTimer=null;
 
-function stopRot() { clearInterval(rotT); rotT=null; $('rreal').checked=false; }
+function stopRot() { clearInterval(rotT); rotT=null; $('rreal').checked=false; syncRotBtn(); }
+function syncRotBtn() {
+  const on=$('rreal').checked;
+  $('rotbtn').classList.toggle('on',on);
+  $('rotbtn').textContent=on?'⏸ DETENER ROTACIÓN':'▶ ROTACIÓN SOLAR';
+}
+$('rotbtn').onclick=()=>{ const c=$('rreal'); c.checked=!c.checked; c.dispatchEvent(new Event('change')); };
 
 function goLive() {
   S.live=true; S.targetDate=null; S.playing=false;
@@ -612,7 +622,7 @@ $('rreal').onchange=e=>{
   const on=e.target.checked;
   manual();
   if (!on) return;
-  e.target.checked=true;
+  e.target.checked=true; syncRotBtn();
   const start = S.live ? new Date(NOW().getTime()-7*86400000) : S.targetDate;
   goDate(start || new Date(NOW().getTime()-7*86400000));
   rotT=setInterval(()=>{
