@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>HELIO — Observatorio Solar</title>
+  <meta name="theme-color" content="#0a0400"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#050200;--bg2:#0d0600;--bg3:#160a00;
+      --corona:#ff6a00;--plasma:#ffaa33;--cold:#1a6aff;--green:#44ff88;
+      --dim:#6b4a20;--border:#2a1800;--border2:#3d2200;
+      --text:#e8c878;--text-dim:#8a6a30;
+      --mono:'IBM Plex Mono',monospace;--display:'Orbitron',sans-serif;
+      --tr:0.28s cubic-bezier(.4,0,.2,1);
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+      background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px)}
+    #app{display:grid;grid-template-rows:48px 1fr auto 32px;grid-template-columns:252px 1fr 262px;height:100dvh}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px;border-bottom:1px solid var(--border2);background:linear-gradient(180deg,#120800,#0a0400)}
+    .logo{display:flex;align-items:baseline;gap:10px}
+    .logo h1{font-family:var(--display);font-size:1.5rem;font-weight:900;letter-spacing:.3em;color:var(--corona);text-shadow:0 0 20px rgba(255,106,0,.5),0 0 40px rgba(255,106,0,.2)}
+    .logo span{font-size:.6rem;color:var(--text-dim);letter-spacing:.15em}
+    .hdr-r{display:flex;align-items:center;gap:18px;font-size:.62rem;letter-spacing:.08em;color:var(--text-dim)}
+    .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    #ts{font-family:var(--display);font-size:.7rem;color:var(--plasma);letter-spacing:.1em}
+    #sidebar-left{border-right:1px solid var(--border);padding:12px 10px;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:4px}
+    #sidebar-left::-webkit-scrollbar{width:3px}
+    #sidebar-left::-webkit-scrollbar-thumb{background:var(--border2)}
+    .sec{font-size:.52rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding:8px 4px 4px;border-top:1px solid var(--border);margin-top:4px}
+    .cbtn{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:8px;padding:7px 8px;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer;text-align:left;width:100%;position:relative;overflow:hidden;transition:var(--tr)}
+    .cbtn::before{content:'';position:absolute;inset:0;background:var(--bc,var(--corona));opacity:0;transition:opacity var(--tr)}
+    .cbtn:hover::before{opacity:.06}
+    .cbtn.active{border-color:var(--bc,var(--corona));background:rgba(255,255,255,.03);box-shadow:inset 3px 0 0 var(--bc,var(--corona))}
+    .cbtn.active::before{opacity:.1}
+    .csw{width:34px;height:26px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:.44rem;font-weight:600}
+    .ci{overflow:hidden}
+    .cn{font-family:var(--display);font-size:.58rem;font-weight:600;letter-spacing:.07em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cd{font-size:.52rem;color:var(--text-dim);line-height:1.3;margin-top:1px}
+    #viewer{position:relative;overflow:hidden;background:#000;cursor:crosshair;user-select:none;container-type:size}
+    #viewer::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.65) 100%)}
+    #stage{position:absolute;top:50%;left:50%;width:min(92cqw,92cqh);height:min(92cqw,92cqh);translate:-50% -50%;transform-origin:center center;will-change:transform;z-index:1}
+    #simg{position:absolute;inset:-12%;width:124%;height:124%;object-fit:contain;display:block;transition:opacity .5s}
+    #simg.loading{opacity:.1}
+    #sglow{position:absolute;top:50%;left:50%;width:min(92cqw,92cqh);height:min(92cqw,92cqh);translate:-50% -50%;border-radius:50%;background:radial-gradient(circle,rgba(255,100,0,.12) 0%,transparent 70%);transition:background 1s;pointer-events:none;z-index:0}
+    #chovl{position:absolute;top:14px;left:14px;z-index:6;pointer-events:none}
+    #chovl .wl{font-family:var(--display);font-size:2.2rem;font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.13);letter-spacing:.05em;line-height:1}
+    #chovl .wn{font-family:var(--display);font-size:.56rem;letter-spacing:.18em;color:rgba(255,255,255,.28);margin-top:2px}
+    #sbadge{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;padding:4px 14px;background:rgba(0,0,0,.7);border:1px solid var(--border2);border-radius:20px;font-size:.58rem;letter-spacing:.1em;color:var(--text-dim);pointer-events:none;white-space:nowrap}
+    #rring{position:absolute;top:12px;right:12px;width:26px;height:26px;z-index:6}
+    #rring circle{fill:none;stroke:var(--corona);stroke-width:2;stroke-dasharray:72;stroke-dashoffset:72;stroke-linecap:round;transform-origin:13px 13px;transform:rotate(-90deg);transition:stroke-dashoffset .3s linear}
+    #zctrl{position:absolute;bottom:14px;right:14px;z-index:6;display:flex;flex-direction:column;gap:4px}
+    .zbtn{width:28px;height:28px;background:rgba(0,0,0,.75);border:1px solid var(--border2);color:var(--text);font-size:1rem;cursor:pointer;border-radius:3px;display:flex;align-items:center;justify-content:center;transition:var(--tr)}
+    .zbtn:hover{border-color:var(--corona);color:var(--corona)}
+    #errov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:10;gap:10px}
+    #errov.on{display:flex}
+    #errov .ei{font-size:2.5rem}
+    #errov p{font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;text-align:center;max-width:280px}
+    #rtbtn{margin-top:6px;padding:7px 18px;background:transparent;border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.58rem;letter-spacing:.18em;cursor:pointer;border-radius:2px}
+    #rtbtn:hover{background:rgba(255,106,0,.1)}
+    #spinner{position:absolute;top:50%;left:50%;width:48px;height:48px;margin:-24px 0 0 -24px;z-index:4;display:none}
+    #spinner.on{display:block}
+    #spinner::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--corona);animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #sidebar-right{border-left:1px solid var(--border);padding:12px 10px;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:12px;font-size:.6rem}
+    #sidebar-right::-webkit-scrollbar{width:3px}
+    #sidebar-right::-webkit-scrollbar-thumb{background:var(--border2)}
+    .pt{font-family:var(--display);font-size:.52rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:5px}
+    .ir{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:2px 0}
+    .ik{color:var(--text-dim);flex-shrink:0}
+    .iv{color:var(--text);text-align:right;font-weight:500}
+    #kpv{font-family:var(--display);font-size:1.8rem;font-weight:900;line-height:1}
+    .btr{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:7px}
+    .bfill{height:100%;border-radius:3px;transition:width 1s,background 1s}
+    .ali{display:flex;gap:7px;padding:5px 7px;border-radius:3px;border:1px solid var(--border);font-size:.58rem;line-height:1.4}
+    .ali.off{opacity:.55}
+    .adot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0;background:var(--border2)}
+    .adG.on{background:#ff4444;box-shadow:0 0 6px #ff4444}.adS.on{background:#ff8800;box-shadow:0 0 6px #ff8800}.adR.on{background:#ffdd00;box-shadow:0 0 6px #ffdd00}
+    .atxt{color:var(--text-dim)}.atxt strong{color:var(--text)}
+    .tr2{display:flex;align-items:center;justify-content:space-between;gap:6px}
+    .tl{color:var(--text-dim);font-size:.58rem}
+    .tog{position:relative;width:30px;height:15px;flex-shrink:0}
+    .tog input{opacity:0;width:0;height:0}
+    .sw{position:absolute;inset:0;background:var(--border2);border-radius:8px;cursor:pointer;transition:var(--tr)}
+    .sw::before{content:'';position:absolute;width:9px;height:9px;left:3px;top:3px;background:var(--text-dim);border-radius:50%;transition:var(--tr)}
+    input:checked+.sw{background:var(--corona)}
+    input:checked+.sw::before{transform:translateX(15px);background:#fff}
+    select,input[type=month]{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:.58rem;padding:3px 6px;border-radius:3px;cursor:pointer;outline:none}
+    select:focus,input[type=month]:focus{border-color:var(--corona)}
+    input[type=range]{width:100%;accent-color:var(--corona);cursor:pointer;height:14px;display:block}
+    .slbl{display:flex;justify-content:space-between;font-size:.48rem;color:var(--text-dim);margin-top:1px}
+    .sval{color:var(--plasma);font-size:.62rem;font-family:var(--display)}
+    .fbtn{display:flex;align-items:center;gap:7px;width:100%;padding:5px 8px;background:rgba(255,80,0,.04);border:1px solid var(--border2);border-radius:3px;cursor:pointer;text-align:left;transition:var(--tr)}
+    .fbtn:hover{border-color:var(--corona);background:rgba(255,106,0,.1)}
+    .fbtn.active{border-color:#ff5555;background:rgba(255,50,50,.12)}
+    .fdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .fi{font-size:.55rem;color:var(--text-dim);line-height:1.3}
+    .fi strong{color:var(--text)}
+    #tl{grid-column:1/-1;background:var(--bg3);border-top:1px solid var(--border2);padding:5px 14px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto}
+    #tl::-webkit-scrollbar{height:3px}
+    #tl::-webkit-scrollbar-thumb{background:var(--border2)}
+    .tll{font-family:var(--display);font-size:.5rem;letter-spacing:.15em;color:var(--dim);flex-shrink:0}
+    .sep{color:var(--border2);flex-shrink:0;padding:0 2px}
+    .tbtn{background:transparent;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--display);font-size:.5rem;letter-spacing:.1em;padding:3px 7px;border-radius:3px;cursor:pointer;transition:var(--tr);flex-shrink:0;white-space:nowrap}
+    .tbtn:hover{border-color:var(--corona);color:var(--corona)}
+    .tbtn.on{border-color:var(--corona);color:var(--corona);background:rgba(255,106,0,.08)}
+    #tlsl{flex:1;accent-color:var(--corona);cursor:pointer;height:16px;min-width:80px}
+    #tld{font-family:var(--display);font-size:.6rem;color:var(--plasma);letter-spacing:.08em;flex-shrink:0;min-width:150px;text-align:right}
+    .dp{display:flex;align-items:center;gap:4px;flex-shrink:0}
+    .dp input[type=number]{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:.56rem;border-radius:3px;outline:none;text-align:center;-moz-appearance:textfield}
+    .dp input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+    .dp input[type=number]:focus{border-color:var(--corona)}
+    #iy{width:42px;padding:3px 4px}#im{width:28px;padding:3px 2px}#id{width:28px;padding:3px 2px}#ih{width:28px;padding:3px 2px}
+    .gb{background:transparent;border:1px solid var(--corona);color:var(--corona);font-family:var(--display);font-size:.48rem;letter-spacing:.12em;padding:3px 8px;border-radius:3px;cursor:pointer;flex-shrink:0}
+    .gb:hover{background:rgba(255,106,0,.12)}
+    .dl{font-size:.48rem;color:var(--text-dim)}
+    footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-top:1px solid var(--border);background:var(--bg2);font-size:.52rem;color:var(--text-dim);letter-spacing:.07em;gap:10px}
+    footer a{color:var(--dim);text-decoration:none}
+    footer a:hover{color:var(--plasma)}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    #simg.loaded{animation:fadeIn .4s ease forwards}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo"><h1>HELIO</h1><span>OBSERVATORIO SOLAR</span></div>
+    <div class="hdr-r">
+      <div class="pulse" id="ldot"></div>
+      <span id="llbl">EN VIVO · NASA/SDO</span>
+      <span id="ts">--:--:-- UTC</span>
+      <span id="lact">—</span>
+    </div>
+  </header>
+
+  <nav id="sidebar-left">
+    <div class="sec" style="border:none;margin:0">Luz Visible</div>
+    <button class="cbtn" data-ch="HMIB" style="--bc:#aaaaff"><div class="csw" style="background:linear-gradient(135deg,#111,#334)"><span style="color:#aaf">HMI B</span></div><div class="ci"><div class="cn">Magnetograma</div><div class="cd">Campo magnético</div></div></button>
+    <button class="cbtn" data-ch="0continuum" style="--bc:#fff8e0"><div class="csw" style="background:linear-gradient(135deg,#2a1a00,#5a3a00)"><span style="color:#ffe">CONT</span></div><div class="ci"><div class="cn">Continuo HMI</div><div class="cd">Fotosfera luz blanca</div></div></button>
+    <div class="sec">Ultravioleta Extremo</div>
+    <button class="cbtn active" data-ch="0304" style="--bc:#ff5522"><div class="csw" style="background:linear-gradient(135deg,#400800,#aa2200)"><span style="color:#ff8866">304Å</span></div><div class="ci"><div class="cn">AIA 304 Å</div><div class="cd">Cromosfera · 50 kK</div></div></button>
+    <button class="cbtn" data-ch="0171" style="--bc:#4499ff"><div class="csw" style="background:linear-gradient(135deg,#000a20,#001a50)"><span style="color:#66aaff">171Å</span></div><div class="ci"><div class="cn">AIA 171 Å</div><div class="cd">Corona quieta · 0.6 MK</div></div></button>
+    <button class="cbtn" data-ch="0193" style="--bc:#33ffaa"><div class="csw" style="background:linear-gradient(135deg,#001a0a,#003a18)"><span style="color:#55ff99">193Å</span></div><div class="ci"><div class="cn">AIA 193 Å</div><div class="cd">Corona / Agujeros · 1.2 MK</div></div></button>
+    <button class="cbtn" data-ch="0211" style="--bc:#ff88cc"><div class="csw" style="background:linear-gradient(135deg,#200010,#500030)"><span style="color:#ff99dd">211Å</span></div><div class="ci"><div class="cn">AIA 211 Å</div><div class="cd">Reg. activas · 2 MK</div></div></button>
+    <button class="cbtn" data-ch="0335" style="--bc:#4466ff"><div class="csw" style="background:linear-gradient(135deg,#000820,#001040)"><span style="color:#8899ff">335Å</span></div><div class="ci"><div class="cn">AIA 335 Å</div><div class="cd">Reg. activas · 2.5 MK</div></div></button>
+    <button class="cbtn" data-ch="0094" style="--bc:#55ffee"><div class="csw" style="background:linear-gradient(135deg,#001a18,#003a30)"><span style="color:#66ffee">094Å</span></div><div class="ci"><div class="cn">AIA 094 Å</div><div class="cd">Fulguraciones · 6 MK</div></div></button>
+    <button class="cbtn" data-ch="0131" style="--bc:#ffee44"><div class="csw" style="background:linear-gradient(135deg,#1a1500,#403200)"><span style="color:#ffee55">131Å</span></div><div class="ci"><div class="cn">AIA 131 Å</div><div class="cd">Fulguraciones · 10 MK</div></div></button>
+    <div class="sec">Composites</div>
+    <button class="cbtn" data-ch="211193171" style="--bc:#ff88ff"><div class="csw" style="background:linear-gradient(135deg,#200020,#501050)"><span style="color:#ff99ff;font-size:.4rem">211+193+171</span></div><div class="ci"><div class="cn">Triple Fusión</div><div class="cd">Colores reales SDO</div></div></button>
+    <button class="cbtn" data-ch="304211171" style="--bc:#ffaa44"><div class="csw" style="background:linear-gradient(135deg,#1a0800,#403000)"><span style="color:#ffaa55;font-size:.4rem">304+211+171</span></div><div class="ci"><div class="cn">Fusión Plasma</div><div class="cd">Prominencias</div></div></button>
+    <button class="cbtn" data-ch="094335193" style="--bc:#44aaff"><div class="csw" style="background:linear-gradient(135deg,#000a20,#00183a)"><span style="color:#44bbff;font-size:.4rem">094+335+193</span></div><div class="ci"><div class="cn">Fusión Caliente</div><div class="cd">Alta temperatura</div></div></button>
+  </nav>
+
+  <main id="viewer">
+    <div id="sglow"></div>
+    <div id="stage"><img id="simg" alt="Sol"/></div>
+    <div id="chovl"><div class="wl" id="owl">304</div><div class="wn" id="own">AIA 304 Å — CROMOSFERA</div></div>
+    <svg id="rring" viewBox="0 0 26 26"><circle cx="13" cy="13" r="11" id="rcirc"/></svg>
+    <div id="zctrl">
+      <button class="zbtn" id="zin">+</button>
+      <button class="zbtn" id="zout">−</button>
+      <button class="zbtn" id="zrst">⊙</button>
+    </div>
+    <div id="sbadge"><span id="bsrc">NASA·SDO</span><span>·</span><span id="bres">—</span><span>·</span><span id="bage">—</span></div>
+    <div id="spinner"></div>
+    <div id="errov">
+      <div class="ei">☀</div>
+      <p>NO SE PUDO CARGAR</p>
+      <p style="font-size:.55rem">Ninguna fuente respondió para este canal y fecha.<br>Probá otro canal, otra fecha o reintentá en unos minutos.</p>
+      <button id="rtbtn" onclick="retry()">REINTENTAR</button>
+    </div>
+  </main>
+
+  <aside id="sidebar-right">
+    <div>
+      <div class="pt">Canal Activo</div>
+      <div class="ir"><span class="ik">Longitud de onda</span><span class="iv" id="iwl">304 Å</span></div>
+      <div class="ir"><span class="ik">Instrumento</span><span class="iv" id="iins">AIA/SDO</span></div>
+      <div class="ir"><span class="ik">Temperatura</span><span class="iv" id="itmp">50,000 K</span></div>
+      <div class="ir"><span class="ik">Región</span><span class="iv" id="ireg">Cromosfera</span></div>
+      <div class="ir"><span class="ik">Color SDO</span><span class="iv" id="icol">Rojo-naranja</span></div>
+    </div>
+    <div>
+      <div class="pt">Clima Espacial · NOAA</div>
+      <div id="kpv" style="color:var(--corona)">—</div>
+      <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px">Índice Kp (actividad geomagnética)</div>
+      <div class="btr"><div class="bfill" id="kpbar" style="width:0%;background:var(--corona)"></div></div>
+    </div>
+    <div>
+      <div class="pt">Escalas NOAA · Ahora</div>
+      <div style="display:flex;flex-direction:column;gap:5px" id="alerts">
+        <div class="ali off"><div class="adot adG"></div><div class="atxt"><strong>G — Tormenta geomagnética</strong><br><span>Cargando…</span></div></div>
+        <div class="ali off"><div class="adot adS"></div><div class="atxt"><strong>S — Radiación solar</strong><br><span>Cargando…</span></div></div>
+        <div class="ali off"><div class="adot adR"></div><div class="atxt"><strong>R — Apagón de radio</strong><br><span>Cargando…</span></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="pt">Región Activa · Mayor área</div>
+      <div class="ir"><span class="ik">Número</span><span class="iv" id="arn" style="color:var(--corona)">—</span></div>
+      <div class="ir"><span class="ik">Clase magnética</span><span class="iv" id="arc">—</span></div>
+      <div class="ir"><span class="ik">Manchas</span><span class="iv" id="arm">—</span></div>
+      <div class="ir"><span class="ik">Última fulgur.</span><span class="iv" id="arf">—</span></div>
+    </div>
+    <div>
+      <div class="pt">🕰 Historia Solar</div>
+      <div style="font-size:.53rem;color:var(--text-dim);margin-bottom:8px;line-height:1.6">
+        Imágenes reales desde <strong style="color:var(--corona)">2010</strong><br>
+        <span style="opacity:.7">SDO/AIA · Helioviewer · SWHV Bélgica</span>
+      </div>
+      <div style="margin-bottom:8px">
+        <input type="range" id="hsl" min="0" max="5478" value="5478" step="1" style="accent-color:var(--corona)">
+        <div class="slbl"><span>May 2010</span><span>Hoy</span></div>
+      </div>
+      <div class="tr2" style="margin-bottom:8px">
+        <span class="tl">Mes exacto</span>
+        <input type="month" id="hmp" min="2010-05" style="font-size:.55rem;padding:2px 4px">
+      </div>
+      <div style="font-size:.5rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">Eventos históricos</div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <button class="fbtn" data-hd="2024-05-10"><span class="fdot" style="background:#ff2200;box-shadow:0 0 6px #ff2200"></span><span class="fi"><strong style="color:#ff5555">X5.8</strong> · Tormenta G5 · May 2024</span></button>
+        <button class="fbtn" data-hd="2017-09-06"><span class="fdot" style="background:#ff4400;box-shadow:0 0 5px #ff4400"></span><span class="fi"><strong style="color:#ff8844">X9.3</strong> · Ciclo 24 máximo · Sep 2017</span></button>
+        <button class="fbtn" data-hd="2012-07-23"><span class="fdot" style="background:#ff8800;box-shadow:0 0 5px #ff8800"></span><span class="fi"><strong>CME masiva</strong> · "La bala esquivada" · Jul 2012</span></button>
+        <button class="fbtn" data-hd="2011-02-15"><span class="fdot" style="background:#ff6600;box-shadow:0 0 5px #ff6600"></span><span class="fi"><strong>X2.2</strong> · 1ª gran fulgur. ciclo 24 · Feb 2011</span></button>
+      </div>
+      <div class="tr2" style="margin-top:10px">
+        <span class="tl">Reproducción auto</span>
+        <label class="tog"><input type="checkbox" id="hplay"><span class="sw"></span></label>
+      </div>
+    </div>
+    <div>
+      <div class="pt">Rotación Solar</div>
+      <div class="tr2" style="margin-bottom:4px">
+        <span class="tl">Rotación real (6 h por fotograma)</span>
+        <label class="tog"><input type="checkbox" id="rreal"><span class="sw"></span></label>
+      </div>
+      <div style="font-size:.5rem;color:var(--text-dim);line-height:1.5;margin-bottom:10px">
+        Reproduce imágenes reales: las estructuras cruzan el disco de izquierda a derecha (~14°/día). Parte de la fecha actual o de 7 días atrás.
+      </div>
+      <div>
+        <div class="tr2" style="margin-bottom:3px"><span class="tl">Orientación de la vista</span><span class="sval" id="rangv">0°</span></div>
+        <input type="range" id="rang" min="-180" max="180" value="0" style="accent-color:var(--cold)">
+        <div class="slbl"><span>−180°</span><span>0° = norte arriba</span><span>180°</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="pt">Actualización</div>
+      <div class="tr2"><span class="tl">Auto-actualizar</span><label class="tog"><input type="checkbox" id="aren" checked><span class="sw"></span></label></div>
+      <div class="tr2" style="margin-top:7px"><span class="tl">Intervalo</span><select id="rint"><option value="60">1 min</option><option value="120">2 min</option><option value="300" selected>5 min</option><option value="600">10 min</option></select></div>
+      <div class="tr2" style="margin-top:7px"><span class="tl">Resolución</span><select id="rres"><option value="512">512 px</option><option value="1024">1024 px</option><option value="2048" selected>2048 px</option></select></div>
+    </div>
+    <div style="font-size:.52rem;color:var(--text-dim);line-height:1.7;border-top:1px solid var(--border);padding-top:8px">
+      <strong style="color:var(--dim)">En vivo:</strong> NASA/SDO · ~15 min<br>
+      <strong style="color:var(--dim)">Histórico:</strong> SWHV (Bélgica) + Helioviewer<br>
+      Satélite SDO · órbita geosincrónica · ~36,000 km
+    </div>
+  </aside>
+
+  <div id="tl">
+    <span class="tll">TIEMPO</span><span class="sep">|</span>
+    <button class="tbtn on" id="blive">⬤ EN VIVO</button>
+    <button class="tbtn" id="bplay">▶ AUTO</button>
+    <button class="tbtn" id="bprev">◀ −1d</button>
+    <input type="range" id="tlsl" min="0" max="5478" value="5478" step="1">
+    <button class="tbtn" id="bnext">+1d ▶</button>
+    <span class="sep">|</span>
+    <span class="tll">VEL</span>
+    <input type="range" id="tlspd" min="1" max="30" value="5" step="1" style="width:60px;flex-shrink:0">
+    <span id="tlsv" style="font-family:var(--display);font-size:.56rem;color:var(--plasma);flex-shrink:0;min-width:32px">5d/s</span>
+    <span class="sep">|</span>
+    <div class="dp">
+      <span class="dl">IR A:</span>
+      <input type="number" id="iy" placeholder="2020" min="2010">
+      <span class="dl">/</span>
+      <input type="number" id="im" placeholder="MM" min="1" max="12">
+      <span class="dl">/</span>
+      <input type="number" id="id" placeholder="DD" min="1" max="31">
+      <span class="dl">h:</span>
+      <input type="number" id="ih" placeholder="12" min="0" max="23">
+      <button class="gb" id="gobtn">IR ▶</button>
+    </div>
+    <span class="sep">|</span>
+    <span id="tld">EN VIVO</span>
+  </div>
+
+  <footer>
+    <span>Datos: <a href="https://sdo.gsfc.nasa.gov" target="_blank" rel="noopener">NASA SDO</a> · <a href="https://www.swpc.noaa.gov" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://helioviewer.org" target="_blank" rel="noopener">Helioviewer</a></span>
+    <span>HELIO Solar Observer v3.2</span>
+    <span><a href="https://spaceweatherlive.com" target="_blank" rel="noopener">SpaceWeatherLive</a></span>
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// HELIO v3.2
+// Cambios vs v3.1:
+//  · Se eliminó el giro falso de la imagen (rotate en el plano). Las imágenes
+//    SDO ya vienen con el norte solar arriba. La rotación solar real se
+//    muestra con fotogramas sucesivos (cada 6 h) de Helioviewer.
+//  · Composites reales (capas múltiples en Helioviewer).
+//  · Escalas NOAA (G/S/R), región activa y última fulguración dinámicas.
+//  · Clave NASA correcta para HMI continuo (HMIIC).
+// ═══════════════════════════════════════════════════════
+
+// nk = clave de NASA "latest" (si difiere del canal) · hv = capa(s) Helioviewer
+const CH = {
+  '0304':      {n:'AIA 304 Å',sh:'304',wl:'304 Å',ins:'AIA/SDO',tmp:'50,000 K',reg:'Cromosfera / Transición',col:'Rojo-naranja',glow:'rgba(255,80,20,.18)',hv:'SDO,AIA,AIA,304'},
+  '0171':      {n:'AIA 171 Å',sh:'171',wl:'171 Å',ins:'AIA/SDO',tmp:'600,000 K',reg:'Corona quieta',col:'Dorado',glow:'rgba(60,130,255,.15)',hv:'SDO,AIA,AIA,171'},
+  '0193':      {n:'AIA 193 Å',sh:'193',wl:'193 Å',ins:'AIA/SDO',tmp:'1.2 MK',reg:'Corona / Agujeros',col:'Bronce-verde',glow:'rgba(30,200,100,.13)',hv:'SDO,AIA,AIA,193'},
+  '0211':      {n:'AIA 211 Å',sh:'211',wl:'211 Å',ins:'AIA/SDO',tmp:'2 MK',reg:'Regiones activas',col:'Púrpura',glow:'rgba(255,80,180,.13)',hv:'SDO,AIA,AIA,211'},
+  '0335':      {n:'AIA 335 Å',sh:'335',wl:'335 Å',ins:'AIA/SDO',tmp:'2.5 MK',reg:'Regiones activas',col:'Azul',glow:'rgba(50,80,255,.15)',hv:'SDO,AIA,AIA,335'},
+  '0094':      {n:'AIA 094 Å',sh:'094',wl:'094 Å',ins:'AIA/SDO',tmp:'6 MK',reg:'Fulguraciones',col:'Verde azulado',glow:'rgba(40,220,210,.13)',hv:'SDO,AIA,AIA,94'},
+  '0131':      {n:'AIA 131 Å',sh:'131',wl:'131 Å',ins:'AIA/SDO',tmp:'10 MK',reg:'Fulguraciones',col:'Amarillo-verde',glow:'rgba(220,210,30,.13)',hv:'SDO,AIA,AIA,131'},
+  '0continuum':{n:'HMI Continuo',sh:'HMI',wl:'Visible',ins:'HMI/SDO',tmp:'5,778 K',reg:'Fotosfera',col:'Naranja',glow:'rgba(255,160,30,.15)',nk:'HMIIC',hv:'SDO,HMI,HMI,continuum'},
+  'HMIB':      {n:'Magnetograma',sh:'MAG',wl:'6173 Å',ins:'HMI/SDO',tmp:'—',reg:'Fotosfera (campo B)',col:'B/N',glow:'rgba(100,100,255,.12)',hv:'SDO,HMI,HMI,magnetogram'},
+  '211193171': {n:'Triple 211+193+171',sh:'RGB',wl:'Composite',ins:'AIA/SDO',tmp:'Multi',reg:'Corona completa',col:'RGB SDO',glow:'rgba(180,80,255,.13)',hv:['SDO,AIA,AIA,211','SDO,AIA,AIA,193','SDO,AIA,AIA,171']},
+  '304211171': {n:'Fusión 304+211+171',sh:'AUR',wl:'Composite',ins:'AIA/SDO',tmp:'Multi',reg:'Cromosfera+Corona',col:'Aurora',glow:'rgba(255,140,30,.13)',hv:['SDO,AIA,AIA,304','SDO,AIA,AIA,211','SDO,AIA,AIA,171']},
+  '094335193': {n:'Fusión 094+335+193',sh:'HOT',wl:'Composite',ins:'AIA/SDO',tmp:'Multi',reg:'Alta temperatura',col:'Frío intenso',glow:'rgba(30,140,255,.15)',hv:['SDO,AIA,AIA,94','SDO,AIA,AIA,335','SDO,AIA,AIA,193']},
+};
+
+// ── Constantes ─────────────────────────────────────────
+const SDO_START = new Date('2010-05-20T00:00:00Z');
+const NOW       = () => new Date();
+const NASA      = 'https://sdo.gsfc.nasa.gov/assets/img/latest/';
+const SWHV      = 'https://api.swhv.oma.be/hv/v2/';
+const HVORG     = 'https://api.helioviewer.org/v2/';
+const P1        = 'https://corsproxy.io/?url=';
+const P2        = 'https://api.allorigins.win/raw?url=';
+const NOAA      = 'https://services.swpc.noaa.gov/';
+
+// ── State ──────────────────────────────────────────────
+const S = {
+  ch:'0304', res:2048,
+  zoom:1, panX:0, panY:0, rotZ:0,
+  live:true, targetDate:null,
+  autoRef:true, refInt:300, countdown:300,
+  playing:false, playSpd:5,
+};
+
+// ── DOM ────────────────────────────────────────────────
+const $      = id => document.getElementById(id);
+const stage  = $('stage'), simg = $('simg'), sglow = $('sglow'), rcirc = $('rcirc');
+const errov  = $('errov'), spin = $('spinner'), viewer = $('viewer');
+const tlsl   = $('tlsl'), tld = $('tld');
+
+// ── Transformación de la vista (zoom / pan / orientación manual) ──
+function applyT() {
+  stage.style.transform = `translate(${S.panX}px,${S.panY}px) scale(${S.zoom}) rotate(${S.rotZ}deg)`;
+}
+$('rang').oninput = e => { S.rotZ = +e.target.value; $('rangv').textContent = S.rotZ + '°'; applyT(); };
+
+function setZoom(nz, mx=0, my=0) {
+  nz = Math.min(Math.max(nz,.25),8);
+  S.panX = mx - (mx-S.panX)*(nz/S.zoom);
+  S.panY = my - (my-S.panY)*(nz/S.zoom);
+  S.zoom = nz; applyT();
+}
+$('zin').onclick  = () => setZoom(S.zoom+.3);
+$('zout').onclick = () => setZoom(S.zoom-.3);
+$('zrst').onclick = () => { S.zoom=1;S.panX=0;S.panY=0;S.rotZ=0;$('rang').value=0;$('rangv').textContent='0°';applyT(); };
+viewer.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r=viewer.getBoundingClientRect();
+  setZoom(S.zoom*(e.deltaY<0?1.12:.89), e.clientX-r.left-r.width/2, e.clientY-r.top-r.height/2);
+},{passive:false});
+
+let drag=false,dsx=0,dsy=0;
+viewer.onmousedown = e=>{drag=true;dsx=e.clientX-S.panX;dsy=e.clientY-S.panY;viewer.style.cursor='grabbing'};
+document.onmousemove = e=>{if(!drag)return;S.panX=e.clientX-dsx;S.panY=e.clientY-dsy;applyT()};
+document.onmouseup  = ()=>{drag=false;viewer.style.cursor=''};
+applyT();
+
+// ── Carga de imágenes (cascada de fuentes) ─────────────
+let loadId = 0;
+
+function tryUrls(urls, lid) {
+  let idx = 0;
+  function next() {
+    if (lid !== loadId) return;
+    if (idx >= urls.length) {
+      spin.classList.remove('on');
+      simg.classList.remove('loading');
+      errov.classList.add('on');
+      return;
+    }
+    const url = urls[idx++];
+    const src = url.includes('swhv') ? 'SWHV'
+              : url.includes('helioviewer') ? 'HV'
+              : (url.includes('corsproxy') || url.includes('allorigins')) ? 'proxy'
+              : 'SDO';
+    $('bsrc').textContent = src + '…';
+    const tmp = new Image();
+    let done = false;
+    const timer = setTimeout(() => { if (done) return; done = true; tmp.src = ''; next(); }, 12000);
+    tmp.onload = () => {
+      if (done) return; done = true;
+      clearTimeout(timer);
+      if (lid !== loadId) return;
+      if (tmp.naturalWidth < 50 || tmp.naturalHeight < 50) { next(); return; }
+      simg.src = url;
+      simg.classList.remove('loading','loaded');
+      void simg.offsetWidth;
+      simg.classList.add('loaded');
+      errov.classList.remove('on');
+      spin.classList.remove('on');
+      $('bsrc').textContent = src;
+      $('bage').textContent = S.live ? 'Ahora' : fmtT(S.targetDate);
+      $('bres').textContent = url.includes('1024') ? '1024px' : url.includes('512') ? '512px' : '2048px';
+    };
+    tmp.onerror = () => { if (done) return; done = true; clearTimeout(timer); next(); };
+    tmp.src = url;
+  }
+  next();
+}
+
+// Capas Helioviewer: una o varias (composites con opacidades decrecientes)
+function makeHVUrl(base, iso, ch) {
+  const m   = CH[ch].hv;
+  const arr = Array.isArray(m) ? m : [m];
+  const ops = arr.length === 1 ? [100] : arr.length === 2 ? [100,50] : [100,50,34];
+  const layer = encodeURIComponent(arr.map((x,i)=>`[${x},1,${ops[i]}]`).join(','));
+  const d = encodeURIComponent(iso);
+  return `${base}takeScreenshot/?date=${d}&imageScale=2.42&layers=${layer}&events=&eventLabels=false&scale=false&x0=0&y0=0&width=1024&height=1024&display=true&watermark=false`;
+}
+
+function liveUrls() {
+  const ch = S.ch, res = S.res, nk = CH[ch].nk || ch;
+  const iso = NOW().toISOString().replace(/\.\d+Z$/,'Z');
+  const urls = [];
+  const hvSWHV = makeHVUrl(SWHV, iso, ch);
+  const hvNASA = makeHVUrl(HVORG, iso, ch);
+  urls.push(hvSWHV, hvNASA, P1+encodeURIComponent(hvSWHV), P1+encodeURIComponent(hvNASA));
+  for (const r of [...new Set([res,1024,512])]) {
+    const b = `${NASA}latest_${r}_${nk}.jpg?t=${Date.now()}`;
+    urls.push(b, P1+encodeURIComponent(b), P2+encodeURIComponent(b));
+  }
+  return urls;
+}
+
+function histUrls(date) {
+  const ch = S.ch, nk = CH[ch].nk || ch;
+  const iso = date.toISOString().replace(/\.\d+Z$/,'Z');
+  const y  = date.getUTCFullYear(), mo = String(date.getUTCMonth()+1).padStart(2,'0'),
+        dy = String(date.getUTCDate()).padStart(2,'0');
+  const ds = `${y}${mo}${dy}`;
+  const urls = [];
+  const hvSWHV = makeHVUrl(SWHV, iso, ch);
+  const hvNASA = makeHVUrl(HVORG, iso, ch);
+  urls.push(hvSWHV, P1+encodeURIComponent(hvSWHV), hvNASA, P1+encodeURIComponent(hvNASA));
+  for (const hh of ['120000','060000','180000','000100']) {
+    for (const r of [1024,512]) {
+      const b = `https://sdo.gsfc.nasa.gov/assets/img/browse/${y}/${mo}/${dy}/${ds}_${hh}_${r}_${nk}.jpg`;
+      urls.push(b, P1+encodeURIComponent(b));
+    }
+  }
+  return urls;
+}
+
+function loadImage() {
+  loadId++;
+  const lid = loadId;
+  simg.classList.add('loading');
+  simg.classList.remove('loaded');
+  errov.classList.remove('on');
+  spin.classList.add('on');
+  tryUrls(S.live ? liveUrls() : histUrls(S.targetDate), lid);
+}
+
+// ── Cambio de canal ────────────────────────────────────
+function switchCh(ch) {
+  S.ch = ch;
+  const c = CH[ch];
+  document.querySelectorAll('.cbtn').forEach(b=>b.classList.toggle('active',b.dataset.ch===ch));
+  $('owl').textContent = c.sh;
+  $('own').textContent = c.n.toUpperCase();
+  sglow.style.background = `radial-gradient(circle,${c.glow} 0%,transparent 70%)`;
+  $('iwl').textContent  = c.wl;
+  $('iins').textContent = c.ins;
+  $('itmp').textContent = c.tmp;
+  $('ireg').textContent = c.reg;
+  $('icol').textContent = c.col;
+  loadImage();
+  if (S.live) resetCd();
+}
+document.querySelectorAll('.cbtn').forEach(b=>b.addEventListener('click',()=>switchCh(b.dataset.ch)));
+
+// ── Utilidades de fecha ────────────────────────────────
+function fmt(d)  { return d.toISOString().substring(0,10); }
+function fmtT(d) { return d.toISOString().substring(0,16).replace('T',' ') + 'Z'; }
+function totalDays() { return Math.floor((NOW()-SDO_START)/86400000); }
+function clamp(d) { const n=NOW(); return d>n?n:d<SDO_START?new Date(SDO_START):d; }
+
+// ── Timeline ───────────────────────────────────────────
+let playT=null, rotT=null, hplayT=null, cTimer=null;
+
+function stopRot() { clearInterval(rotT); rotT=null; $('rreal').checked=false; }
+
+function goLive() {
+  S.live=true; S.targetDate=null; S.playing=false;
+  clearInterval(playT); clearInterval(hplayT); stopRot();
+  $('hplay').checked=false;
+  tlsl.max=totalDays(); tlsl.value=totalDays();
+  tld.textContent='EN VIVO'; tld.style.color='var(--plasma)';
+  $('blive').classList.add('on');
+  $('bplay').classList.remove('on');
+  $('ldot').style.background='var(--green)';
+  $('llbl').textContent='EN VIVO · NASA/SDO';
+  loadImage(); resetCd();
+}
+
+function goDate(date) {
+  date=clamp(date);
+  const days=Math.floor((date-SDO_START)/86400000);
+  if (days>=totalDays()) { goLive(); return; }
+  S.live=false; S.targetDate=date;
+  clearInterval(cTimer);
+  tlsl.max=totalDays(); tlsl.value=days;
+  tld.textContent=fmtT(date); tld.style.color='var(--text)';
+  $('blive').classList.remove('on');
+  $('ldot').style.background='var(--corona)';
+  $('llbl').textContent='HISTÓRICO · SWHV/HV';
+  loadImage();
+}
+
+// Navegación manual: detiene las reproducciones automáticas
+function manual() { clearInterval(playT); clearInterval(hplayT); stopRot(); S.playing=false; $('bplay').classList.remove('on'); $('hplay').checked=false; }
+
+tlsl.addEventListener('input', e => {
+  manual();
+  const d = new Date(SDO_START.getTime() + +e.target.value * 86400000);
+  if (+e.target.value >= totalDays()) goLive(); else goDate(d);
+});
+
+$('blive').onclick = goLive;
+$('bprev').onclick = () => { manual(); goDate(new Date((S.live?NOW():S.targetDate).getTime()-86400000)); };
+$('bnext').onclick = () => { manual(); if (!S.live) goDate(new Date(S.targetDate.getTime()+86400000)); };
+
+$('tlspd').oninput = e => { S.playSpd=+e.target.value; $('tlsv').textContent=S.playSpd+'d/s'; };
+
+$('bplay').onclick = () => {
+  const turnOn = !S.playing;
+  manual();
+  if (!turnOn) return;
+  S.playing=true;
+  $('bplay').classList.add('on');
+  if (S.live) goDate(new Date(SDO_START));
+  playT=setInterval(()=>{
+    if(!S.targetDate||S.targetDate>=NOW()){goLive();return;}
+    goDate(new Date(S.targetDate.getTime()+S.playSpd*86400000));
+  },800);
+};
+
+$('gobtn').onclick = () => {
+  const maxY = NOW().getUTCFullYear();
+  const y=+$('iy').value||0;
+  const mo=+$('im').value||1;
+  const d=+$('id').value||1;
+  const h=$('ih').value===''?12:+$('ih').value;
+  if (y<2010||y>maxY){alert('Año inválido (2010–'+maxY+')');return;}
+  manual();
+  goDate(new Date(Date.UTC(y,mo-1,d,h,0,0)));
+};
+['iy','im','id','ih'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('gobtn').click()}));
+
+// Historia (sidebar)
+$('hsl').addEventListener('input', e => {
+  manual();
+  const days = +e.target.value;
+  const d = new Date(SDO_START.getTime()+days*86400000);
+  if (days>=totalDays()) goLive(); else goDate(d);
+  $('hmp').value = d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+});
+$('hmp').addEventListener('change', e => {
+  if (!e.target.value) return;
+  manual();
+  const [y,m]=e.target.value.split('-').map(Number);
+  goDate(new Date(Date.UTC(y,m-1,15,12,0,0)));
+});
+document.querySelectorAll('[data-hd]').forEach(b=>b.addEventListener('click',()=>{
+  manual();
+  document.querySelectorAll('[data-hd]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  goDate(new Date(b.dataset.hd+'T12:00:00Z'));
+}));
+
+$('hplay').onchange=e=>{
+  const on=e.target.checked;
+  manual();
+  if (!on) return;
+  e.target.checked=true;
+  if (S.live) goDate(new Date(SDO_START));
+  hplayT=setInterval(()=>{
+    const cur=S.targetDate?new Date(S.targetDate.getTime()+30*86400000):NOW();
+    if (cur>=NOW()){goLive();return;}
+    goDate(cur);
+  },1500);
+};
+
+// ── Rotación solar REAL: fotogramas sucesivos cada 6 h ─
+$('rreal').onchange=e=>{
+  const on=e.target.checked;
+  manual();
+  if (!on) return;
+  e.target.checked=true;
+  const start = S.live ? new Date(NOW().getTime()-7*86400000) : S.targetDate;
+  goDate(start || new Date(NOW().getTime()-7*86400000));
+  rotT=setInterval(()=>{
+    if (!S.targetDate) { stopRot(); return; }
+    const nx=new Date(S.targetDate.getTime()+6*3600000);
+    if (nx>=NOW()) { goLive(); return; }
+    goDate(nx);
+  },2000);
+};
+
+// ── Auto-refresh ───────────────────────────────────────
+function resetCd() {
+  clearInterval(cTimer); S.countdown=S.refInt; updateRing(0);
+  if (!S.autoRef||!S.live) return;
+  cTimer=setInterval(()=>{
+    S.countdown--;
+    updateRing(1-S.countdown/S.refInt);
+    const el=S.refInt-S.countdown;
+    $('bage').textContent=el<60?`${el}s atrás`:`${Math.floor(el/60)}m atrás`;
+    if(S.countdown<=0){loadImage();S.countdown=S.refInt;updateRing(0);}
+  },1000);
+}
+function updateRing(p){rcirc.style.strokeDashoffset=72-p*72}
+
+$('aren').onchange=e=>{S.autoRef=e.target.checked;resetCd()};
+$('rint').onchange=e=>{S.refInt=+e.target.value;resetCd()};
+$('rres').onchange=e=>{S.res=+e.target.value;if(S.live)loadImage()};
+
+function retry(){loadImage()}
+
+// ── Reloj ──────────────────────────────────────────────
+function tick(){
+  const t=NOW().toISOString().split('T')[1].substring(0,8);
+  $('ts').textContent=t+' UTC';
+  $('lact').textContent='Act: '+t;
+}
+setInterval(tick,1000); tick();
+
+// ── NOAA: Kp ───────────────────────────────────────────
+async function fetchKp(){
+  try{
+    const r=await fetch(NOAA+'products/noaa-planetary-k-index.json');
+    const d=await r.json();
+    if(d?.length>1){
+      const last=d[d.length-1];
+      const kp=parseFloat(Array.isArray(last)?last[1]:(last.Kp ?? last.kp_index ?? last.kp));
+      if(!isNaN(kp)){
+        const col=kp<3?'var(--green)':kp<5?'#ffcc00':kp<7?'#ff8800':'#ff3333';
+        $('kpv').textContent=kp.toFixed(1);
+        $('kpv').style.color=col;
+        $('kpbar').style.cssText=`width:${Math.min(kp/9,1)*100}%;background:${col}`;
+      }
+    }
+  }catch{$('kpv').textContent='—'}
+}
+
+// ── NOAA: escalas G / S / R (estado actual) ────────────
+async function fetchScales(){
+  const LV={1:'Menor',2:'Moderado',3:'Fuerte',4:'Severo',5:'Extremo'};
+  const defs=[['G','Tormenta geomagnética','adG'],['S','Radiación solar','adS'],['R','Apagón de radio','adR']];
+  try{
+    const r=await fetch(NOAA+'products/noaa-scales.json');
+    const d=await r.json();
+    const c=d['0'];
+    const box=$('alerts'); box.innerHTML='';
+    defs.forEach(([k,name,cls])=>{
+      const sc=Math.max(0,Math.min(5,parseInt(c?.[k]?.Scale,10)||0));
+      const el=document.createElement('div');
+      el.className='ali'+(sc>0?'':' off');
+      el.innerHTML=`<div class="adot ${cls}${sc>0?' on':''}"></div><div class="atxt"><strong>${k}${sc>0?sc:''} — ${name}</strong><br>${sc>0?LV[sc]:'Sin actividad'}</div>`;
+      box.appendChild(el);
+    });
+  }catch{
+    document.querySelectorAll('#alerts .atxt span').forEach(s=>s.textContent='No disponible');
+  }
+}
+
+// ── NOAA: región activa de mayor área y última fulguración ──
+async function fetchRegion(){
+  try{
+    const r=await fetch(NOAA+'json/solar_regions.json');
+    const d=await r.json();
+    const last=d.map(x=>x.observed_date).filter(Boolean).sort().pop();
+    const rs=d.filter(x=>x.observed_date===last).sort((a,b)=>(+b.area||0)-(+a.area||0));
+    const t=rs[0];
+    if(t){
+      $('arn').textContent='AR '+(parseInt(t.region,10)||'—');
+      $('arc').textContent=t.mag_class||'—';
+      $('arm').textContent=t.number_spots ?? '—';
+    }
+  }catch{}
+  try{
+    const r=await fetch(NOAA+'json/goes/primary/xray-flares-latest.json');
+    const d=await r.json();
+    const f=Array.isArray(d)?d[0]:d;
+    $('arf').textContent=String(f?.max_class||f?.current_class||'—').substring(0,6);
+  }catch{}
+}
+
+// ── INIT ───────────────────────────────────────────────
+(function init(){
+  const n=NOW();
+  $('hmp').max=n.getUTCFullYear()+'-'+String(n.getUTCMonth()+1).padStart(2,'0');
+  $('iy').max=n.getUTCFullYear();
+  tlsl.max=totalDays(); tlsl.value=totalDays();
+  $('hsl').max=totalDays(); $('hsl').value=totalDays();
+  switchCh('0304');
+  fetchKp(); fetchScales(); fetchRegion();
+  setInterval(fetchKp,60000);
+  setInterval(fetchScales,300000);
+  setInterval(fetchRegion,900000);
+})();
+</script>
+</body>
+</html>
